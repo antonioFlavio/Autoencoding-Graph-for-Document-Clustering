@@ -2,20 +2,28 @@
 Data cleansing based on the details in the paper
 "Determining Gains Acquired from Word Embedding Quantitatively Using Discrete Distribution Clustering"
 """
+import sys
 
-import paths
+from tqdm import tqdm 
+sys.path.append('./')
+# import paths
 import os
 import re
 import csv
 
+try:
+    from src.paths import *
+except:
+    from paths import *
+import re
 
 def __prepare_the20nes():
-    ds = open(paths.the20news_dataset, mode='w')  # saving cleaned database
+    ds = open(the20news_dataset, mode='w')  # saving cleaned database
     ds_writer = csv.writer(ds, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     ds_writer.writerow(['category', 'document'])  # column names
 
-    for cat in os.listdir(paths.the20news_original_dataset):
-        cat_adr = paths.the20news_original_dataset + cat
+    for cat in os.listdir(the20news_original_dataset):
+        cat_adr = the20news_original_dataset + cat
         if os.path.isdir(cat_adr):
             for doc_file in os.listdir(cat_adr):
                 doc_adr = cat_adr + '/' + doc_file
@@ -36,9 +44,11 @@ def __prepare_the20nes():
 
 
 def __read_dataset():  # 18692 documents in 20 categories
-    with open(paths.the20news_dataset) as ds:
+    with open(the20news_dataset) as ds:
         reader = csv.reader(ds, delimiter=',')
         headers = next(reader)
         for row in reader:
             print('Category:  ', row[0])
             print('Document:  ', row[1])
+
+__prepare_the20nes()

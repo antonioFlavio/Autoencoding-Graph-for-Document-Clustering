@@ -2,6 +2,8 @@ import os
 import sys
 import tensorflow as tf
 
+sys.path.append('./')
+
 import paths
 from src.processing.GAE_to_KCG import GAE
 from src.processing.document_embedding import extract_embeddings

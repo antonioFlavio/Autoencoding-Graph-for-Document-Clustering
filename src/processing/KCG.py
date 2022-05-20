@@ -10,6 +10,8 @@ from src.utils.datasets import fetch_dataset
 import paths
 import numpy as np
 import pickle
+import os
+from pathlib import Path
 from src.utils.text import preprocess
 from src.utils.datasets import name_of_dataset
 
@@ -79,6 +81,12 @@ def get_documents_kcg(dataset_path, big_graph):
     else:
         graph_file_path = paths.models + 'keyword_correlation_graph/' + dataset_name + '.pkl'
     data = fetch_dataset(dataset_path)
+
+    obj_graph_file_path = Path(graph_file_path)
+
+    if not obj_graph_file_path.parent.exists():
+        obj_graph_file_path.parent.mkdir(parents=True, exist_ok=True)
+    
     try:
         nodes, adjacency, doc_to_node_mapping = pickle.load(open(graph_file_path, 'rb'))
         documents_labels = data[:, 0]

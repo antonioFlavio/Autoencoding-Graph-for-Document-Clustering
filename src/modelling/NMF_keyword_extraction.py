@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from src.utils.mathematical import cosine_similarity
 from collections import defaultdict
+from pathlib import Path
 import numpy as np
 import pickle
 import paths
@@ -105,6 +106,9 @@ def extract_top_keywords(documents_sentences, big_graph, dataset_name=None):
     # for the20news dataset, 86.93% (269509/310018) sentences are assigned to the dummy node!
 
     if keywords_file_path is not None:
+        keywords_file_path = Path(keywords_file_path)
+        if not keywords_file_path.exists():
+            keywords_file_path.parent.mkdir(parents=True, exist_ok=True)
         pickle.dump(keyword_sents, open(keywords_file_path, 'wb'))
     print('top keywords are extracted')
     return keyword_sents
