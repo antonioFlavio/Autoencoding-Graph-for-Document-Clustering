@@ -40,11 +40,15 @@ def create_kcg(documents, big_graph, dataset_name=None):
     nodes = []  # a list of {'keyword', 'feature'}
     adjacency = np.zeros([len(keyword_sents), len(keyword_sents)], dtype=float)
 
+    print("Model loaded: {} -- Max seq lenght: {}".format(sentence_transformer._get_name(), sentence_transformer.max_seq_length))
+
     for node_idx, keyword in enumerate(keyword_sents):
         print('node {}/{}'.format(node_idx, len(keyword_sents)))
         sentences_idx_tuple = keyword_sents[keyword]
+        print("Encoding {} docs".format(len(documents_sentences)))
         embeddings_list = sentence_transformer.encode(
             [documents_sentences[doc_idx][sent_idx] for doc_idx, sent_idx in sentences_idx_tuple])
+        print("Encoding finished")
         average_embeddings = np.sum(embeddings_list, axis=0) / len(sentences_idx_tuple)
 
         # node feature
