@@ -36,6 +36,8 @@ def extract_top_keywords(documents_sentences, big_graph, dataset_name=None):
             keywords_file_path = paths.models + 'document_keywords_set/' + dataset_name + '.pkl'
 
         try:
+            if not Path(keywords_file_path).exists:
+                print("File not found: " + keywords_file_path)
             keyword_sents = pickle.load(open(keywords_file_path, 'rb'))
             print('top keywords of documents are loaded')
             return keyword_sents
