@@ -1,6 +1,7 @@
 from src.modelling.LoNGAE.train_lp_with_feats import run
 from .KCG import get_documents_kcg
 import paths
+import time
 import numpy as np
 from src.utils.datasets import name_of_dataset
 from tensorflow import keras
@@ -25,8 +26,11 @@ class GAE:
             saving_directory = paths.models + 'graph_ae/big_{}/'.format(name_of_dataset(self.dataset_path))
         else:
             saving_directory = paths.models + 'graph_ae/{}/'.format(name_of_dataset(self.dataset_path))
+        start_train_gae = time.time()
         self._encoder, self._ae = run(self._adjacency, self._nodes_features, saving_directory=saving_directory,
                                       validate=validate)
+        end_train_gae = time.time()
+        paths.time_convert("train gae", end_train_gae - start_train_gae)
 
     def validate(self):
         self._train(validate=True)

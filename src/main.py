@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import tensorflow as tf
 
 sys.path.append('./')
@@ -40,7 +41,11 @@ def run(dataset_path, clustering_method, big_graph=False, verbose=False):
     """
     with HiddenPrints(verbose):
         gae = GAE(dataset_path, big_graph)
+        start_time_extract_emb_gae = time.time()
         doc2emb = extract_embeddings(gae)
+        end_time_extract_emb_gae = time.time()
+        paths.time_convert("extract_embeddings", end_time_extract_emb_gae - start_time_extract_emb_gae)
+        
         clustering_labels = cluster_embeddings(doc2emb,
                                                document_num=len(gae.documents_labels),
                                                n_labels=number_of_labels(name_of_dataset(dataset_path)),
@@ -68,6 +73,7 @@ if __name__ == '__main__':
     clustering_method = 'spectral'
     print("\nCLUSTERING METHOD <{}> on dataset <{}>".format(clustering_method, name_of_dataset(dataset_path)))
     run(dataset_path, clustering_method, big_graph=True, verbose=True)
+    # run(dataset_path=paths.reuters_dataset, clustering_method='spectral', big_graph=False, verbose=True)
 
     # ignored documents:
     # retuers - small graph: 3391/7884 (43%)

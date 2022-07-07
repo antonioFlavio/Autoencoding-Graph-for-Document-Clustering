@@ -1,6 +1,9 @@
+from importlib.resources import path
 from sklearn.cluster import SpectralClustering, KMeans
 from src.modelling.deep_clustering.clustering_model import DeepClusteringModel
 import numpy as np
+import time
+import paths
 
 
 def cluster_embeddings(doc2emb, document_num, n_labels, method):
@@ -23,7 +26,11 @@ def cluster_embeddings(doc2emb, document_num, n_labels, method):
         # we use the last label for ignored documents
         n_clusters = n_labels - 1
         
+    start_time_clustering = time.time()
     labels = do_clustering(embeddings, n_clusters, method)
+    end_time_clustering = time.time()
+    paths.time_convert("do_clustering", end_time_clustering - start_time_clustering)
+
 
     doc2label = {}
     for i, doc_id in enumerate(doc2emb.keys()):
@@ -51,7 +58,10 @@ def cluster_embeddings_wo_ignored(doc2emb, true_labels, n_labels, method):
     
     embeddings = np.array(list(doc2emb.values()))
 
+    start_time_clustering = time.time()
     labels = do_clustering(embeddings, n_labels, method)
+    end_time_clustering = time.time()
+    paths.time_convert("do_clustering_wo_ignored", end_time_clustering - start_time_clustering)
 
     clustering_labels_wo_ignored, true_labels_wo_ignored = [], []
 

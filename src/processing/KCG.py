@@ -11,6 +11,7 @@ import paths
 import numpy as np
 import pickle
 import os
+import time
 from pathlib import Path
 from src.utils.text import preprocess
 from src.utils.datasets import name_of_dataset
@@ -28,12 +29,17 @@ def create_kcg(documents, big_graph, dataset_name=None):
              and doc_to_node_mapping which is a mapping from documnet index to its related nodes
     """
     sentence_transformer = get_sentence_transformer()
+    print("documents count: {}".format(str(len(documents))))
     documents_sentences = [split_document(doc) for doc in documents]
 
     doc_to_node_mapping = [[] for _ in range(len(documents_sentences))]
     # doc_to_node_mapping[i] is a list containing the indexes of the nodes related to the i-th document
 
+    start_timer_top_keywords = time.time()
     keyword_sents = extract_top_keywords(documents_sentences, big_graph, dataset_name=dataset_name)
+    end_timer_top_keywords = time.time()
+    paths.time_convert("extract_top_keywords", end_timer_top_keywords - start_timer_top_keywords)
+
     if THE_DUMMY_NODE in keyword_sents:
         del keyword_sents[THE_DUMMY_NODE]  # not considering the dummy node in the graph
 
@@ -41,14 +47,15 @@ def create_kcg(documents, big_graph, dataset_name=None):
     adjacency = np.zeros([len(keyword_sents), len(keyword_sents)], dtype=float)
 
     print("Model loaded: {} -- Max seq lenght: {}".format(sentence_transformer._get_name(), sentence_transformer.max_seq_length))
-
+    
+    start_timer_kcg = time.time()
     for node_idx, keyword in enumerate(keyword_sents):
         print('node {}/{}'.format(node_idx, len(keyword_sents)))
         sentences_idx_tuple = keyword_sents[keyword]
-        print("Encoding {} docs".format(len(documents_sentences)))
+        # print("Encoding {} docs".format(len(documents_sentences)))
         embeddings_list = sentence_transformer.encode(
             [documents_sentences[doc_idx][sent_idx] for doc_idx, sent_idx in sentences_idx_tuple])
-        print("Encoding finished")
+        # print("Encoding finished")
         average_embeddings = np.sum(embeddings_list, axis=0) / len(sentences_idx_tuple)
 
         # node feature
@@ -56,7 +63,7 @@ def create_kcg(documents, big_graph, dataset_name=None):
 
         # node adjacency vector
         for other_node_idx, other_keyword in enumerate(keyword_sents):
-            print('--inner loop node {}/{}'.format(other_node_idx, len(keyword_sents)))
+            # print('--inner loop node {}/{}'.format(other_node_idx, len(keyword_sents)))
             other_sentences_idx_tuple = keyword_sents[other_keyword]
             other_embeddings_list = sentence_transformer.encode(
                 [documents_sentences[doc_idx][sent_idx] for doc_idx, sent_idx in other_sentences_idx_tuple])
@@ -65,6 +72,9 @@ def create_kcg(documents, big_graph, dataset_name=None):
 
         for doc_idx, _ in sentences_idx_tuple:
             doc_to_node_mapping[doc_idx].append(node_idx)
+
+    end_timer_kcg = time.time()
+    paths.time_convert("kcg created", end_timer_kcg - start_timer_kcg)
 
     print('nodes\' features and adjacency vector are computed')
 
