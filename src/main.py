@@ -29,7 +29,7 @@ class HiddenPrints:
             sys.stdout = self._original_stdout
 
 
-def run(dataset_path, clustering_method, big_graph=False, verbose=False):
+def run(dataset_path, clustering_method, big_graph=False, verbose=False, n_cluster=0):
     """
 
     :param dataset_path: paths.reuters_dataset or paths.the20news_dataset
@@ -39,6 +39,11 @@ def run(dataset_path, clustering_method, big_graph=False, verbose=False):
 
     evaluating the document clustering approach using AMI and Accuracy metrics
     """
+    if n_cluster > 0:
+        n_labels = n_cluster
+    else:
+        n_labels = number_of_labels(name_of_dataset(dataset_path))
+
     with HiddenPrints(verbose):
         gae = GAE(dataset_path, big_graph)
         start_time_extract_emb_gae = time.time()
@@ -46,9 +51,11 @@ def run(dataset_path, clustering_method, big_graph=False, verbose=False):
         end_time_extract_emb_gae = time.time()
         paths.time_convert("extract_embeddings", end_time_extract_emb_gae - start_time_extract_emb_gae)
         
+        
+
         clustering_labels = cluster_embeddings(doc2emb,
                                                document_num=len(gae.documents_labels),
-                                               n_labels=number_of_labels(name_of_dataset(dataset_path)),
+                                               n_labels=n_labels,
                                                method=clustering_method)
         acc = accuracy(gae.documents_labels, clustering_labels)
         ami = adjusted_mutual_info(gae.documents_labels, clustering_labels)
@@ -59,7 +66,7 @@ def run(dataset_path, clustering_method, big_graph=False, verbose=False):
         clustering_labels_wo_ignored, true_labels_wo_ignored = \
             cluster_embeddings_wo_ignored(doc2emb,
                                           gae.documents_labels,
-                                          n_labels=number_of_labels(name_of_dataset(dataset_path)),
+                                          n_labels=n_cluster,
                                           method=clustering_method)
         acc = accuracy(true_labels_wo_ignored, clustering_labels_wo_ignored)
         ami = adjusted_mutual_info(true_labels_wo_ignored, clustering_labels_wo_ignored)
